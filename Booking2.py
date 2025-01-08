@@ -65,7 +65,7 @@ def icbc_booking_process():
         # Perform login actions
         driver.find_element(By.ID, "mat-input-0").send_keys("Beikahmadi")
         driver.find_element(By.ID, "mat-input-1").send_keys("30381426")
-        driver.find_element(By.ID, "mat-input-2").send_keys("Mohammad12498")
+        driver.find_element(By.ID, "mat-input-2").send_keys("Mohammad")
         driver.find_element(By.XPATH, "//label[@for='mat-checkbox-1-input']").click()
         driver.find_element(By.XPATH, "//button[contains(text(),'Sign in')]").click()
         print("Sign-in process completed.")
@@ -87,3 +87,42 @@ def icbc_booking_process():
 # Run the script
 if __name__ == "__main__":
     icbc_booking_process()
+def click_next_button(driver, wait):
+    """Click the 'Next' button."""
+    try:
+        # تلاش برای پیدا کردن دکمه با انتخابگر اصلی
+        next_button = wait.until(
+            EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'primary') and text()='Next']"))
+        )
+        driver.execute_script("arguments[0].scrollIntoView(true);", next_button)
+        driver.execute_script("arguments[0].click();", next_button)
+        print("Next button clicked.")
+    except Exception as e:
+        print(f"Failed to click 'Next' button with primary selector: {e}")
+
+        # بررسی انتخابگرهای جایگزین
+        try:
+            alternate_buttons = driver.find_elements(By.XPATH, "//button[contains(@class, 'primary')]")
+            if alternate_buttons:
+                print(f"Found {len(alternate_buttons)} potential 'Next' buttons. Attempting click.")
+                for button in alternate_buttons:
+                    if "Next" in button.text:
+                        driver.execute_script("arguments[0].scrollIntoView(true);", button)
+                        driver.execute_script("arguments[0].click();", button)
+                        print("Alternate 'Next' button clicked.")
+                        return
+            else:
+                print("No alternate 'Next' buttons found.")
+        except Exception as alt_e:
+            print(f"Failed to find or click alternate 'Next' buttons: {alt_e}")
+
+        # ذخیره صفحه برای بررسی بیشتر
+        try:
+            with open("debug_page_source.html", "w", encoding="utf-8") as f:
+                f.write(driver.page_source)
+            print("Saved page source for debugging.")
+        except Exception as debug_e:
+            print(f"Failed to save page source: {debug_e}")
+
+
+# سایر بخش‌های کد ثابت مانده‌اند
